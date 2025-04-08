@@ -5,165 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const visualizationImg = document.querySelector('.visualization img');
     if (!visualizationImg) return;
 
-    // Add zoom functionality
-    setupZoomFunctionality(visualizationImg);
-
-    // Add element info popup functionality
+    // Setup only the element info popup functionality
     setupElementInfoPopup(visualizationImg);
 });
-
-function setupZoomFunctionality(visualizationImg) {
-    let scale = 1;
-    let panX = 0;
-    let panY = 0;
-    let isDragging = false;
-    let startX, startY;
-    const zoomStep = 0.2;  // Increased zoom step for better visibility
-    const maxZoom = 10;    // Maximum zoom level
-
-    // Create zoom and pan controls
-    const visualizationContainer = document.querySelector('.visualization');
-    const zoomControls = document.createElement('div');
-    zoomControls.className = 'zoom-controls';
-    zoomControls.innerHTML = `
-        <div class="btn-group">
-            <button id="zoom-in" class="btn btn-sm btn-outline-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
-                </svg>
-                Zoom In
-            </button>
-            <button id="zoom-out" class="btn btn-sm btn-outline-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/>
-                </svg>
-                Zoom Out
-            </button>
-            <button id="reset-view" class="btn btn-sm btn-outline-dark">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-                    <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-                </svg>
-                Reset View
-            </button>
-        </div>
-        <div class="mt-2 instructions text-muted small">
-            <p>Tip: You can drag to pan the view and use mouse wheel to zoom. Click on a tag to see element details.</p>
-        </div>
-    `;
-
-    // Insert zoom controls before the visualization
-    visualizationContainer.insertBefore(zoomControls, visualizationContainer.firstChild);
-
-    // Function to update the transform
-    function updateTransform() {
-        visualizationImg.style.transform = `scale(${scale}) translate(${panX}px, ${panY}px)`;
-    }
-
-    // Add zoom in functionality
-    document.getElementById('zoom-in').addEventListener('click', function() {
-        if (scale < maxZoom) {
-            scale += zoomStep;
-            updateTransform();
-        }
-    });
-
-    // Add zoom out functionality
-    document.getElementById('zoom-out').addEventListener('click', function() {
-        if (scale > zoomStep) {
-            scale -= zoomStep;
-            updateTransform();
-        }
-    });
-
-    // Add reset functionality
-    document.getElementById('reset-view').addEventListener('click', function() {
-        scale = 1;
-        panX = 0;
-        panY = 0;
-        updateTransform();
-    });
-
-    // Mouse wheel zoom
-    visualizationContainer.addEventListener('wheel', function(e) {
-        e.preventDefault();
-
-        // Get mouse position relative to the image
-        const rect = visualizationContainer.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        // Calculate zoom change
-        const delta = -Math.sign(e.deltaY) * zoomStep;
-        const newScale = Math.max(zoomStep, Math.min(maxZoom, scale + delta));
-
-        if (newScale !== scale) {
-            // Calculate new pan offsets to zoom toward mouse position
-            const scaleRatio = newScale / scale;
-            panX = mouseX - scaleRatio * (mouseX - panX);
-            panY = mouseY - scaleRatio * (mouseY - panY);
-
-            scale = newScale;
-            updateTransform();
-        }
-    }, { passive: false });
-
-    // Pan with mouse drag
-    visualizationContainer.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        startX = e.clientX - panX;
-        startY = e.clientY - panY;
-        visualizationContainer.style.cursor = 'grabbing';
-    });
-
-    document.addEventListener('mousemove', function(e) {
-        if (isDragging) {
-            panX = e.clientX - startX;
-            panY = e.clientY - startY;
-            updateTransform();
-        }
-    });
-
-    document.addEventListener('mouseup', function() {
-        if (isDragging) {
-            isDragging = false;
-            visualizationContainer.style.cursor = 'grab';
-        }
-    });
-
-    // Prevent context menu on right-click for better interaction
-    visualizationContainer.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    });
-
-    // Add styles for the zoom functionality
-    const style = document.createElement('style');
-    style.textContent = `
-        .visualization {
-            overflow: hidden;
-            max-height: 70vh;
-            position: relative;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin: 1rem 0;
-            cursor: grab;
-        }
-        .visualization img {
-            transition: transform 0.05s ease-out;
-            transform-origin: center center;
-            display: block;
-            margin: 0 auto;
-        }
-        .zoom-controls {
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        .instructions {
-            opacity: 0.8;
-        }
-    `;
-    document.head.appendChild(style);
-}
 
 function setupElementInfoPopup(visualizationImg) {
     // Check if element data is available
@@ -185,7 +29,7 @@ function setupElementInfoPopup(visualizationImg) {
         const style = document.createElement('style');
         style.textContent = `
             .element-info-popup {
-                position: absolute;
+                position: fixed; /* Changed from absolute to fixed for better positioning */
                 display: none;
                 background-color: white;
                 border: 1px solid #ddd;
@@ -225,6 +69,21 @@ function setupElementInfoPopup(visualizationImg) {
             /* Make the visualization image clickable */
             .visualization img {
                 cursor: pointer;
+                max-width: 100%;
+                height: auto;
+                margin: 0 auto;
+                display: block;
+            }
+            
+            /* Static visualization container */
+            .visualization {
+                overflow: hidden;
+                max-height: 70vh;
+                position: relative;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                margin: 1rem 0;
+                text-align: center;
             }
         `;
         document.head.appendChild(style);
@@ -241,21 +100,58 @@ function setupElementInfoPopup(visualizationImg) {
 
     // Add click handler to the visualization image
     visualizationImg.addEventListener('click', function(e) {
-        // Don't show popup during drag operations
-        if (window.isDragging) return;
+        console.log("Image clicked");
 
-        // For simplicity, just show element info directly when image is clicked
-        // Find the closest element to where the user clicked
+        // Get the image's position and dimensions
         const rect = visualizationImg.getBoundingClientRect();
-        const clickX = (e.clientX - rect.left) / scale - panX;
-        const clickY = (e.clientY - rect.top) / scale - panY;
 
-        // Find any element ID to display
-        let closestElement = null;
-        let minDistance = Infinity;
+        // Calculate click position relative to the image
+        // This is a direct calculation without any scaling or panning
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        // Calculate the ratio of the displayed image to its natural size
+        const displayRatio = rect.width / visualizationImg.naturalWidth;
+
+        // Convert click coordinates to the original image coordinates
+        const originalX = clickX / displayRatio;
+        const originalY = clickY / displayRatio;
+
+        console.log("Click coordinates:", clickX, clickY);
+        console.log("Original image coordinates:", originalX, originalY);
+
+        // Find the element that was clicked
+        const element = findElementAtPosition(originalX, originalY);
+
+        if (element) {
+            console.log("Element found:", element);
+            showElementInfo(element, e.clientX, e.clientY);
+        } else {
+            console.log("No element found at click position");
+            // No element found, hide the popup
+            popup.style.display = 'none';
+        }
+    });
+
+    // Function to find element at click position with a distance threshold
+    function findElementAtPosition(clickX, clickY) {
+        // Define a reasonable maximum distance for considering a click "on" an element
+        const maxDistanceThreshold = 10; // Units in coordinate space
+
+        let bestMatch = null;
+        let bestDistance = Infinity;
 
         for (const id in elementData) {
             const element = elementData[id];
+
+            // First check direct hit - if click is inside element bounds
+            if (clickX >= element.min_x && clickX <= element.max_x &&
+                clickY >= element.min_y && clickY <= element.max_y) {
+                console.log("Direct hit on element:", element.id);
+                return element; // Direct hit - return immediately
+            }
+
+            // If not a direct hit, calculate distance to element center
             const centerX = (element.min_x + element.max_x) / 2;
             const centerY = (element.min_y + element.max_y) / 2;
 
@@ -264,16 +160,18 @@ function setupElementInfoPopup(visualizationImg) {
                 Math.pow(clickY - centerY, 2)
             );
 
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestElement = element;
+            console.log(`Element ${element.id} distance: ${distance}`);
+
+            // Only consider this element if it's closer than current best and within threshold
+            if (distance < bestDistance && distance < maxDistanceThreshold) {
+                bestDistance = distance;
+                bestMatch = element;
             }
         }
 
-        if (closestElement) {
-            showElementInfo(closestElement, e.clientX, e.clientY);
-        }
-    });
+        // Only return an element if it's within our threshold
+        return (bestDistance < maxDistanceThreshold) ? bestMatch : null;
+    }
 
     // Function to show element info popup
     function showElementInfo(element, x, y) {
@@ -315,19 +213,4 @@ function setupElementInfoPopup(visualizationImg) {
             popup.style.display = 'none';
         }
     });
-
-    // Define variables if they're not already defined (needed for popup click handler)
-    if (typeof scale === 'undefined') {
-        var scale = 1;
-    }
-
-    if (typeof panX === 'undefined') {
-        var panX = 0;
-    }
-
-    if (typeof panY === 'undefined') {
-        var panY = 0;
-    }
-
-    window.isDragging = false; // Use window scope to share across functions
 }
