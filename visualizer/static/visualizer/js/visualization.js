@@ -48,7 +48,7 @@ function setupZoomFunctionality(visualizationImg) {
             </button>
         </div>
         <div class="mt-2 instructions text-muted small">
-            <p>Tip: You can also drag to pan the view and use mouse wheel to zoom. Click on the image and enter an element ID to see details.</p>
+            <p>Tip: You can drag to pan the view and use mouse wheel to zoom. Click on a tag to see element details.</p>
         </div>
     `;
 
@@ -221,6 +221,11 @@ function setupElementInfoPopup(visualizationImg) {
             .element-info-popup .close-button:hover {
                 color: #333;
             }
+            
+            /* Make the visualization image clickable */
+            .visualization img {
+                cursor: pointer;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -237,16 +242,36 @@ function setupElementInfoPopup(visualizationImg) {
     // Add click handler to the visualization image
     visualizationImg.addEventListener('click', function(e) {
         // Don't show popup during drag operations
-        if (isDragging) return;
+        if (window.isDragging) return;
 
-        // Show an input dialog to get the element ID
-        const elementId = prompt("Enter element ID to view details:");
+        // For simplicity, just show element info directly when image is clicked
+        // Find the closest element to where the user clicked
+        const rect = visualizationImg.getBoundingClientRect();
+        const clickX = (e.clientX - rect.left) / scale - panX;
+        const clickY = (e.clientY - rect.top) / scale - panY;
 
-        if (elementId && elementData[elementId]) {
-            // Show popup with element details
-            showElementInfo(elementData[elementId], e.clientX, e.clientY);
-        } else if (elementId) {
-            alert("Element ID not found. Please try again.");
+        // Find any element ID to display
+        let closestElement = null;
+        let minDistance = Infinity;
+
+        for (const id in elementData) {
+            const element = elementData[id];
+            const centerX = (element.min_x + element.max_x) / 2;
+            const centerY = (element.min_y + element.max_y) / 2;
+
+            const distance = Math.sqrt(
+                Math.pow(clickX - centerX, 2) +
+                Math.pow(clickY - centerY, 2)
+            );
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestElement = element;
+            }
+        }
+
+        if (closestElement) {
+            showElementInfo(closestElement, e.clientX, e.clientY);
         }
     });
 
@@ -291,8 +316,18 @@ function setupElementInfoPopup(visualizationImg) {
         }
     });
 
-    // Define isDragging if it's not already defined (needed for popup click handler)
-    if (typeof isDragging === 'undefined') {
-        var isDragging = false;
+    // Define variables if they're not already defined (needed for popup click handler)
+    if (typeof scale === 'undefined') {
+        var scale = 1;
     }
+
+    if (typeof panX === 'undefined') {
+        var panX = 0;
+    }
+
+    if (typeof panY === 'undefined') {
+        var panY = 0;
+    }
+
+    window.isDragging = false; // Use window scope to share across functions
 }
