@@ -1,8 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from .forms import JsonUploadForm
 from .utils import parse_json_data, place_tags_grid_snapping, generate_visualization
 
@@ -22,8 +19,10 @@ def visualize(request):
         if form.is_valid():
             # Get form settings
             show_other_families = form.cleaned_data.get('show_other_families', False)
-            tag_size = form.cleaned_data.get('tag_size', 12)
-            auto_scale = form.cleaned_data.get('auto_scale', True)
+
+            # Use default values for visualization settings
+            tag_size = 12
+            auto_scale = True  # Always enable auto-scaling for better visualization
 
             # Get and save the file temporarily
             json_file = request.FILES['json_file']
@@ -51,7 +50,7 @@ def visualize(request):
             # Generate tags with optimized positions
             tags = place_tags_grid_snapping(kit_elements, other_elements, tag_size)
 
-            # Generate visualization - now returns tuple (image, element_data)
+            # Generate visualization
             image_data, element_data_json = generate_visualization(
                 kit_elements, tags, other_elements, tag_size, auto_scale
             )
@@ -66,7 +65,7 @@ def visualize(request):
 
             return render(request, 'visualizer/result.html', {
                 'image_data': image_data,
-                'element_data_json': element_data_json,  # Pass JSON data to template
+                'element_data_json': element_data_json,
                 'stats': stats,
                 'form': form
             })
