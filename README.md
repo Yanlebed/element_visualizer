@@ -41,11 +41,6 @@ A Django web application for visualizing KIT(DS)1 family elements from JSON data
    pip install -r requirements.txt
    ```
 
-4. Migrate the database:
-   ```bash
-   python manage.py migrate
-   ```
-
 ## Running the Application
 
 1. Start the Django development server:
