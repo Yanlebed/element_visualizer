@@ -13,9 +13,12 @@ A Django web application for visualizing KIT(DS)1 family elements from JSON data
 
 ## Requirements
 
-- Python 3.9 or higher
-- Django 4.2.10
+- Python 3.9+
+- Django>=4.2.10
 - Matplotlib 3.7.2
+- Numpy>=1.24.3
+- Pillow>=10.0.0
+- Setuptools>=65.5.0
 
 ## Installation
 
@@ -123,5 +126,7 @@ element_visualizer/
 │   ├── utils.py             # Visualization logic
 │   └── views.py             # View functions
 ├── manage.py                # Django management script
-└── requirements.txt         # Project dependencies
+├── requirements.txt         # Project dependencies
+├── multiple_elements.json   # JSON file to test visualization of multiple elements
+└── single_element.json      # JSON file to test visualization of single element
 ```
