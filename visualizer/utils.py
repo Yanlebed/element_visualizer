@@ -1,17 +1,14 @@
 # visualizer/utils.py
-import json
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 import base64
-import random
+import json
 import math
-import os
-from django.conf import settings
+
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 class Element:
@@ -508,6 +505,7 @@ def place_tags_grid_snapping(kit_elements, other_elements=None, tag_size=8):
             tag.y = tag.element.center_y + dy * new_distance - tag.height / 2
 
     return tags
+
 
 def create_element_data_json(kit_elements, other_elements=None):
     """Create a JSON string with element data for JavaScript interaction"""
