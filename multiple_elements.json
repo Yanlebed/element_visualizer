@@ -1,0 +1,122 @@
+[
+  {
+    "id": 7866474,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Socket",
+      "min": { "x": 1706.7449, "y": 101.2527, "z": 116.5833 },
+      "center": { "x": 1706.8283, "y": 101.3360, "z": 116.6666 },
+      "max": { "x": 1706.9116, "y": 101.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 7866475,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Socket",
+      "min": { "x": 1710.5449, "y": 105.2527, "z": 116.5833 },
+      "center": { "x": 1710.6283, "y": 105.3360, "z": 116.6666 },
+      "max": { "x": 1710.7116, "y": 105.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 7866476,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Socket",
+      "min": { "x": 1714.3449, "y": 109.2527, "z": 116.5833 },
+      "center": { "x": 1714.4283, "y": 109.3360, "z": 116.6666 },
+      "max": { "x": 1714.5116, "y": 109.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 7866477,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Socket",
+      "min": { "x": 1718.1449, "y": 101.2527, "z": 116.5833 },
+      "center": { "x": 1718.2283, "y": 101.3360, "z": 116.6666 },
+      "max": { "x": 1718.3116, "y": 101.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 7866478,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Socket",
+      "min": { "x": 1721.9449, "y": 105.2527, "z": 116.5833 },
+      "center": { "x": 1722.0283, "y": 105.3360, "z": 116.6666 },
+      "max": { "x": 1722.1116, "y": 105.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 7866479,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Socket",
+      "min": { "x": 1725.7449, "y": 109.2527, "z": 116.5833 },
+      "center": { "x": 1725.8283, "y": 109.3360, "z": 116.6666 },
+      "max": { "x": 1725.9116, "y": 109.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 8866474,
+    "coordinates": {
+      "family_name": "Trmb_FieldPoints_MarkerGraphic_Marker",
+      "min": { "x": 1706.7449, "y": 115.2527, "z": 116.5833 },
+      "center": { "x": 1706.8283, "y": 115.3360, "z": 116.6666 },
+      "max": { "x": 1706.9116, "y": 115.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 8866475,
+    "coordinates": {
+      "family_name": "Trmb_FieldPoints_MarkerGraphic_Marker",
+      "min": { "x": 1710.5449, "y": 119.2527, "z": 116.5833 },
+      "center": { "x": 1710.6283, "y": 119.3360, "z": 116.6666 },
+      "max": { "x": 1710.7116, "y": 119.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 8866476,
+    "coordinates": {
+      "family_name": "Trmb_FieldPoints_MarkerGraphic_Marker",
+      "min": { "x": 1714.3449, "y": 123.2527, "z": 116.5833 },
+      "center": { "x": 1714.4283, "y": 123.3360, "z": 116.6666 },
+      "max": { "x": 1714.5116, "y": 123.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 8866477,
+    "coordinates": {
+      "family_name": "Trmb_FieldPoints_MarkerGraphic_Marker",
+      "min": { "x": 1718.1449, "y": 115.2527, "z": 116.5833 },
+      "center": { "x": 1718.2283, "y": 115.3360, "z": 116.6666 },
+      "max": { "x": 1718.3116, "y": 115.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 8866478,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Junction",
+      "min": { "x": 1721.9449, "y": 119.2527, "z": 116.5833 },
+      "center": { "x": 1722.0283, "y": 119.3360, "z": 116.6666 },
+      "max": { "x": 1722.1116, "y": 119.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  },
+  {
+    "id": 8866479,
+    "coordinates": {
+      "family_name": "KIT(DS)1_Junction",
+      "min": { "x": 1725.7449, "y": 123.2527, "z": 116.5833 },
+      "center": { "x": 1725.8283, "y": 123.3360, "z": 116.6666 },
+      "max": { "x": 1725.9116, "y": 123.4193, "z": 116.7499 }
+    },
+    "document": "BES - model (R23)"
+  }
+]
