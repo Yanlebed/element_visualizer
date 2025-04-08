@@ -71,8 +71,8 @@ class Tag:
 
         # Base dimensions on text length with constraints
         # These will be adjusted based on view area in place_tags_grid_snapping
-        self.width = 0.2 * text_length + 0.4  # Increased from 0.15 to 0.2 for more room
-        self.height = 0.6  # Increased from 0.5 to 0.6 for better text visibility
+        self.width = 0.2 * text_length + 0.4  # Increased for more room
+        self.height = 0.6  # Increased for better text visibility
 
         # The actual size constraints will be applied after view area is known
         # in place_tags_grid_snapping and generate_visualization
@@ -118,8 +118,8 @@ class Tag:
 
     def overlaps_element(self, element):
         """Check if tag overlaps with any element"""
-        # Add a small buffer for visual separation
-        buffer = 0.1
+        # Larger buffer for better separation
+        buffer = 0.2  # Increased from 0.1 to 0.2
 
         if (self.x - buffer < element.max_x + buffer and
                 self.x + self.width + buffer > element.min_x - buffer and
@@ -127,6 +127,55 @@ class Tag:
                 self.y + self.height + buffer > element.min_y - buffer):
             return True
         return False
+
+    def _line_intersects_rectangle(self, line_x1, line_y1, line_x2, line_y2,
+                                   rect_x1, rect_y1, rect_x2, rect_y2):
+        """Helper method to check if a line segment intersects a rectangle"""
+        # Check if either endpoint is inside the rectangle
+        if (rect_x1 <= line_x1 <= rect_x2 and rect_y1 <= line_y1 <= rect_y2) or \
+                (rect_x1 <= line_x2 <= rect_x2 and rect_y1 <= line_y2 <= rect_y2):
+            return True
+
+        # Check if the line intersects any of the rectangle's edges
+        # This is a simplified check - doesn't catch all cases but good enough for our purpose
+        edges = [
+            (rect_x1, rect_y1, rect_x2, rect_y1),  # Top edge
+            (rect_x2, rect_y1, rect_x2, rect_y2),  # Right edge
+            (rect_x1, rect_y2, rect_x2, rect_y2),  # Bottom edge
+            (rect_x1, rect_y1, rect_x1, rect_y2)  # Left edge
+        ]
+
+        for edge_x1, edge_y1, edge_x2, edge_y2 in edges:
+            if self._line_segments_intersect(
+                    line_x1, line_y1, line_x2, line_y2,
+                    edge_x1, edge_y1, edge_x2, edge_y2
+            ):
+                return True
+
+        return False
+
+    def _line_segments_intersect(self, line1_x1, line1_y1, line1_x2, line1_y2,
+                                 line2_x1, line2_y1, line2_x2, line2_y2):
+        """Check if two line segments intersect"""
+        # Calculate the direction vectors
+        dx1 = line1_x2 - line1_x1
+        dy1 = line1_y2 - line1_y1
+        dx2 = line2_x2 - line2_x1
+        dy2 = line2_y2 - line2_y1
+
+        # Calculate the determinant
+        det = dx1 * dy2 - dy1 * dx2
+
+        # If det is zero, lines are parallel
+        if abs(det) < 1e-10:
+            return False
+
+        # Calculate parameters t and s for the intersection point
+        t = ((line2_x1 - line1_x1) * dy2 - (line2_y1 - line1_y1) * dx2) / det
+        s = ((line2_x1 - line1_x1) * dy1 - (line2_y1 - line1_y1) * dx1) / det
+
+        # Check if intersection is within both line segments
+        return 0 <= t <= 1 and 0 <= s <= 1
 
     def distance_to_element(self):
         """Calculate distance from tag center to element center"""
@@ -283,7 +332,7 @@ def place_tags_grid_snapping(kit_elements, other_elements=None, tag_size=8):
 
     # Create grid with cells sized based on the view and elements
     # For multiple elements scenario like in the test JSON
-    grid_density = 30  # Increased for finer grid
+    grid_density = 40  # Increased for even finer grid (was 30)
 
     # Calculate cell dimensions based on view size and desired density
     # We want cells that are small enough for precise placement but
@@ -292,18 +341,21 @@ def place_tags_grid_snapping(kit_elements, other_elements=None, tag_size=8):
     grid_cell_height = max(view_height / grid_density, avg_tag_height * 0.7)
 
     # Calculate grid dimensions
-    grid_width = max(10, int(view_width / grid_cell_width) + 2)
-    grid_height = max(10, int(view_height / grid_cell_height) + 2)
+    grid_width = max(15, int(view_width / grid_cell_width) + 2)  # Increased minimum size
+    grid_height = max(15, int(view_height / grid_cell_height) + 2)  # Increased minimum size
 
     # Create grid to track occupied cells
     grid = [[False for _ in range(grid_width)] for _ in range(grid_height)]
 
-    # Mark cells occupied by elements
+    # Mark cells occupied by elements with a larger margin
     for element in all_elements:
-        start_col = max(0, int((element.min_x - min_x) / grid_cell_width))
-        end_col = min(grid_width - 1, int((element.max_x - min_x) / grid_cell_width) + 1)
-        start_row = max(0, int((element.min_y - min_y) / grid_cell_height))
-        end_row = min(grid_height - 1, int((element.max_y - min_y) / grid_cell_height) + 1)
+        # Use a safety margin around elements to prevent tags overlapping
+        safety_margin = max(element.width, element.height) * 1.5  # Increased margin
+
+        start_col = max(0, int((element.min_x - safety_margin - min_x) / grid_cell_width))
+        end_col = min(grid_width - 1, int((element.max_x + safety_margin - min_x) / grid_cell_width) + 1)
+        start_row = max(0, int((element.min_y - safety_margin - min_y) / grid_cell_height))
+        end_row = min(grid_height - 1, int((element.max_y + safety_margin - min_y) / grid_cell_height) + 1)
 
         for row in range(start_row, end_row + 1):
             for col in range(start_col, end_col + 1):
@@ -321,7 +373,7 @@ def place_tags_grid_snapping(kit_elements, other_elements=None, tag_size=8):
         min_distance = float('inf')
 
         # For multiple elements, increase the search radius to find better tag positions
-        search_radius = max(8, min(grid_width, grid_height) // 2)
+        search_radius = max(10, min(grid_width, grid_height) // 2)  # Increased from 8 to 10
 
         # Score possible positions instead of just using distance
         for r in range(-search_radius, search_radius + 1):
@@ -369,13 +421,14 @@ def place_tags_grid_snapping(kit_elements, other_elements=None, tag_size=8):
             tag.line_start_x = element.center_x
             tag.line_start_y = element.center_y
         else:
-            # If no good position found, offset slightly from element
-            offset = max(element.width, element.height) * 1.5
+            # If no good position found, place far from the element to avoid overlap
+            # Use a larger offset for safety
+            offset = max(element.width, element.height) * 3  # Increased from 1.5 to 3
             tag.x = element.center_x + offset
             tag.y = element.center_y + offset
 
     # Resolve remaining overlaps if any
-    max_adjustment_attempts = 3
+    max_adjustment_attempts = 5  # Increased from 3 to 5
     for _ in range(max_adjustment_attempts):
         overlap_found = False
 
@@ -393,29 +446,68 @@ def place_tags_grid_snapping(kit_elements, other_elements=None, tag_size=8):
                     if abs(dx) > abs(dy):
                         # Horizontal separation
                         if dx > 0:
-                            tag1.x += 0.2
-                            tag2.x -= 0.2
+                            tag1.x += 0.3  # Increased from 0.2 to 0.3
+                            tag2.x -= 0.3
                         else:
-                            tag1.x -= 0.2
-                            tag2.x += 0.2
+                            tag1.x -= 0.3
+                            tag2.x += 0.3
                     else:
                         # Vertical separation
                         if dy > 0:
-                            tag1.y += 0.2
-                            tag2.y -= 0.2
+                            tag1.y += 0.3
+                            tag2.y -= 0.3
                         else:
-                            tag1.y -= 0.2
-                            tag2.y += 0.2
+                            tag1.y -= 0.3
+                            tag2.y += 0.3
 
         # If no overlaps were found, we're done
         if not overlap_found:
             break
 
+    # Add extra checks to ensure tags don't overlap elements
+    # This ensures we catch any remaining overlaps after grid placement
+    for tag in tags:
+        # Check against all elements, not just the one the tag belongs to
+        for element in all_elements:
+            if tag.overlaps_element(element):
+                # Move tag away from element
+                dx = tag.x + tag.width / 2 - element.center_x
+                dy = tag.y + tag.height / 2 - element.center_y
+
+                # Calculate distance and normalize
+                dist = math.sqrt(dx * dx + dy * dy)
+                if dist < 0.001:  # Avoid division by zero
+                    dx, dy = 1.0, 0.0  # Default to moving right
+                else:
+                    dx, dy = dx / dist, dy / dist
+
+                # Move tag outward along this direction
+                move_distance = element.width + tag.width / 2 + 0.3  # Ensure enough clearance
+                tag.x = element.center_x + dx * move_distance
+                tag.y = element.center_y + dy * move_distance
+
     # Align tags in horizontal or vertical groups
     align_tags_in_groups(tags, proximity_threshold=grid_cell_height)
 
-    return tags
+    # Final check for edge cases - make sure all tags are within reasonable bounds
+    # and not too far from their elements
+    for tag in tags:
+        # Get the distance from tag to its element
+        dx = tag.x + tag.width / 2 - tag.element.center_x
+        dy = tag.y + tag.height / 2 - tag.element.center_y
+        distance = math.sqrt(dx * dx + dy * dy)
 
+        # If tag is too far from its element, bring it closer along the same direction
+        if distance > 10:  # Maximum allowed distance
+            # Normalize direction vector
+            dx, dy = dx / distance, dy / distance
+
+            # Move tag closer to element but still maintain direction
+            new_distance = 5  # Reasonable distance
+            tag.x = tag.element.center_x + dx * new_distance - tag.width / 2
+            tag.y = tag.element.center_y + dy * new_distance - tag.height / 2
+
+    return tags
 
 def create_element_data_json(kit_elements, other_elements=None):
     """Create a JSON string with element data for JavaScript interaction"""
@@ -568,22 +660,6 @@ def generate_visualization(kit_elements, tags, other_elements=None, tag_size=12,
                 linestyle='-',
                 linewidth=1.2
             )
-
-        # # Add simplified element information below the plot
-        # element_info = f"Element ID: {element.id}"
-        # if element.family_name:
-        #     element_info += f" | Family: {element.family_name}"
-        #
-        # # Place text at the bottom of the figure, outside the axes
-        # fig.text(
-        #     0.5, 0.01,  # Centered at bottom
-        #     element_info,
-        #     ha='center',
-        #     va='bottom',
-        #     fontsize=12,
-        #     weight='bold',
-        #     bbox=dict(boxstyle='round', facecolor='#f0f0f0', alpha=0.9, pad=0.5)
-        # )
 
         # Set labels
         ax.set_xlabel('X Coordinate')
